@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trendslope</title>
+<link rel="icon" type="image/gif" href="favicon.gif">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/fonts.css">
+<style>
+:root{--rise:clamp(18px,4vw,32px);--bg:#fff;--panel:#F2F7FD;--line:#D9E5F2;--text:#10233F;--dim:#64798E;--blue:#1B63E0;--radius:10px}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+button{font-family:inherit;cursor:pointer}
+/* boogie header */
+.disco{position:relative;color:#fff;background:linear-gradient(120deg,#2a0a4a,#6a11cb 35%,#ff2fa0 70%,#ffb347);background-size:300% 300%;animation:shift 12s ease infinite;z-index:5;-webkit-clip-path:polygon(0 0,100% 0,100% calc(100% - var(--rise)),0 100%);clip-path:polygon(0 0,100% 0,100% calc(100% - var(--rise)),0 100%);padding-bottom:calc(var(--rise) + 40px)}
+@keyframes shift{50%{background-position:100% 50%}}
+.disco:before{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.35) 1px,transparent 2px) 0 0/26px 26px;animation:twinkle 2.4s linear infinite;opacity:.5}
+@keyframes twinkle{50%{opacity:.15}}
+.hero{position:relative;max-width:1700px;margin:0 auto;padding:18px 24px 10px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.hero img{width:240px;max-width:44vw;height:auto;border-radius:14px;border:3px solid #00ffd0;box-shadow:0 0 24px #ff2fa0,0 0 8px #00ffd0;transform:rotate(-3deg)}
+h1{font-family:Oswald,sans-serif;font-weight:700;text-transform:uppercase;font-size:clamp(40px,9vw,84px);line-height:.9;margin:0;letter-spacing:.03em;text-shadow:3px 3px 0 #ff2fa0,6px 6px 0 #1B63E0,0 0 28px #fff8}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.18em;text-transform:uppercase;margin:10px 0 0;color:#00ffd0}
+.slope{position:absolute;left:0;bottom:6px;height:30px;line-height:30px;transform-origin:0 100%;white-space:nowrap;overflow:hidden;z-index:2;pointer-events:none}
+.slope .tr{display:inline-block;font-family:Oswald,sans-serif;font-weight:600;letter-spacing:.22em;font-size:14px;text-shadow:0 1px 6px rgba(0,0,0,.4)}   /* scrolled by script (see marquee) */
+main{max-width:1700px;margin:0 auto;padding:0 24px 60px}
+.controls{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;padding:10px 0;background:linear-gradient(var(--bg) 78%,transparent)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tab{font-family:Oswald;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:13px;color:var(--dim);background:none;border:0;border-radius:999px;padding:7px 15px}
+.tab.on{background:var(--blue);color:#fff}
+.mono{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim)}
+.btn{background:var(--panel);border:1px solid var(--line);color:var(--blue);border-radius:6px;padding:6px 11px;font-family:'IBM Plex Mono',monospace;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;margin-top:8px}
+.tc{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 2px rgba(16,35,63,.04);color:inherit;text-decoration:none}
+.tc:hover{border-color:var(--blue)}
+.th{position:relative;aspect-ratio:4/3;background:var(--panel);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.th img{width:100%;height:100%;object-fit:cover}
+.th.logo img{object-fit:contain;padding:18px}
+.th .fb{font-family:Oswald;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);font-size:12px;padding:10px;text-align:center}
+.pill{position:absolute;left:8px;bottom:8px;border-radius:999px;padding:3px 10px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#fff}
+.when{position:absolute;right:8px;top:8px;background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+.star{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:999px;width:30px;height:30px;font-size:16px;line-height:1;color:#bbb}
+.star.on{color:#F2A93B}
+.bd{padding:10px 12px 12px}
+.bd b{display:block;font-size:14px;line-height:1.3}
+.bd span{display:block;color:var(--dim);font-size:12.5px;margin-top:4px;font-family:'IBM Plex Mono',monospace;line-height:1.45}
+.grid{align-items:start}
+.tile{display:block;min-width:0}
+.tile.w2{grid-column:span 2}
+@media(max-width:560px){.tile.w2{grid-column:span 1}}
+.daydiv{grid-column:1/-1;margin-top:14px;padding:7px 16px;border-radius:10px;color:#fff;font-family:Oswald,sans-serif;font-weight:600;font-size:14px;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(100deg,#2a0a4a,#6a11cb 45%,#ff2fa0);box-shadow:0 2px 10px rgba(106,17,203,.25)}
+.daydiv small{font-family:'IBM Plex Mono',monospace;letter-spacing:.05em;opacity:.8;margin-left:10px;font-size:11px;text-transform:none}
+.srcs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+@media(min-width:701px){#menu{flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 330px)}}
+.chip2{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--dim);border-radius:999px;padding:4px 13px;font:600 12px Oswald,sans-serif;letter-spacing:.1em;text-transform:uppercase}
+.chip2.on{color:#fff;border-color:transparent}.srcbr{display:none}
+
+body{position:relative}
+#menu{position:absolute;top:16px;right:20px;z-index:60;display:flex;gap:8px;flex-wrap:nowrap}
+#menu a{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:rgba(20,5,40,.35);border:1px solid rgba(255,255,255,.3);color:#fff;text-decoration:none;font:600 10px Oswald,sans-serif;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#menu a:hover{background:#fff;color:#4a0e8f}
+#menu a i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+#burger{display:none;position:absolute;top:14px;right:14px;z-index:61;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(20,5,40,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer;padding:0;align-items:center;justify-content:center;flex-direction:column;gap:5px}
+#burger span{display:block;width:20px;height:2px;border-radius:2px;background:#fff;transition:transform .2s,opacity .2s}
+#burger[aria-expanded=true] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#burger[aria-expanded=true] span:nth-child(2){opacity:0}
+#burger[aria-expanded=true] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+@media(max-width:1279px){
+ #burger{display:flex}
+ #menu{display:none;flex-direction:column;top:66px;right:14px;gap:2px;padding:8px;border-radius:14px;background:linear-gradient(135deg,#2a0a4a,#5b0fb8);box-shadow:0 14px 34px rgba(0,0,0,.45);min-width:240px;max-width:calc(100vw - 28px)}
+ #menu.open{display:flex}
+ #menu a{border:0;background:none;border-radius:10px;padding:12px 12px;font-size:13px;-webkit-backdrop-filter:none;backdrop-filter:none}
+ #menu a:hover{background:rgba(255,255,255,.14);color:#fff}}
+#siteview{display:none}
+#siteview iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+#back{display:none;position:fixed;left:1rem;bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:400;align-items:center;gap:.4rem;font:600 .78rem system-ui,-apple-system,sans-serif;color:#fff;background:linear-gradient(100deg,#2a0a4a,#6a11cb);border:1px solid #8e2de2;border-radius:999px;padding:.4rem .8rem;cursor:pointer;box-shadow:0 10px 24px -12px rgba(0,0,0,.6)}
+#back:hover{border-color:#ff2fa0;color:#ffd0ec}
+#totop{display:flex;position:fixed;right:1rem;bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:400;align-items:center;gap:.4rem;font:600 .78rem system-ui,-apple-system,sans-serif;color:#fff;background:linear-gradient(100deg,#2a0a4a,#6a11cb);border:1px solid #8e2de2;border-radius:999px;padding:.45rem .85rem;cursor:pointer;box-shadow:0 10px 24px -12px rgba(0,0,0,.6);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s}
+#totop.show{opacity:1;pointer-events:auto;transform:none}
+#totop:hover{border-color:#ff2fa0;color:#ffd0ec}
+body.site-mode #totop{display:none}
+#totop svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#back svg{width:.95rem;height:.95rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+body.site-mode{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+body.site-mode main{display:none}
+body.site-mode .disco{flex:none}
+.disco{padding-bottom:calc(var(--rise) + 32px)}
+.disco .hero{padding:8px 16px 0;gap:12px;flex-wrap:nowrap}
+.disco .hero img{width:84px;max-width:84px;border-width:2px;box-shadow:0 0 14px #ff2fa0}
+.disco h1{font-size:clamp(24px,6vw,40px);text-shadow:2px 2px 0 #ff2fa0,3px 3px 0 #1B63E0}
+.disco .tag{display:none}
+body.site-mode #siteview{display:block;position:fixed;left:0;right:0;top:0;bottom:0;overflow:hidden}   /* the site fills the whole screen; the banner sits on top and scrolls away */
+body.site-mode #back{display:flex}
+@media(max-width:700px){
+ /* phones: a slim full-width bar, still slanted: tall on the left, short on the right (where the menu button sits) */
+ :root{--rise:22px}
+ .disco{padding-bottom:30px}
+ .disco .hero{padding:9px 52px 9px 14px;gap:10px;min-height:58px}
+ .disco .hero img{width:60px;max-width:60px;border-width:2px;border-radius:8px;box-shadow:0 0 8px #ff2fa0}
+ .disco h1{font-size:24px;text-shadow:1px 1px 0 #ff2fa0,2px 2px 0 #1B63E0}
+ .slope{height:22px;line-height:22px;bottom:5px}.slope .tr{font-size:12px}
+ #burger{top:2px;right:8px;width:32px;height:32px;font-size:17px;border-radius:50%}
+ #menu{top:40px;right:8px}
+ main{padding-left:14px;padding-right:14px}
+ .controls{gap:6px 8px;padding:8px 0;justify-content:flex-start;flex-wrap:nowrap}
+ .controls .tabs{flex-wrap:nowrap;flex:0 0 auto;gap:2px;padding:2px}
+ .controls .mono{margin-left:auto;white-space:nowrap}
+ .tab{font-size:11px;padding:6px 9px;white-space:nowrap}
+ .mono{font-size:10.2px}
+ .btn{font-size:10.2px;padding:5px 9px}
+ .srcs{gap:5px}
+ .chip2{font-size:10px;padding:3.4px 9px;letter-spacing:.06em;flex:0 0 auto;text-align:center}
+ .srcbr{display:none}   /* phones: chips wrap naturally onto the next line, no forced break */
+}
+.loading{grid-column:1/-1;text-align:center;padding:90px 0 120px;font:600 18px Oswald,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);animation:ldpulse 1.2s ease-in-out infinite}
+@keyframes ldpulse{50%{opacity:.4}}
+@media(prefers-reduced-motion:reduce){.loading{animation:none}}
+@media(min-width:701px){.disco{overflow:hidden}}
+</style></head><body>
+<header class="disco">
+ <div class="hero">
+  <img src="runner.gif" alt="Trendslope runner" width="240" height="160">
+  <div><h1>Trendslope</h1><p class="tag">Run the slope · dodge the noise · catch the trends</p>
+   <p class="tag">No Ads · No Database · No Comments</p></div>
+ </div>
+ <div class="slope" id="slope"><span class="tr" id="mq">TRENDSLOPE</span></div>
+</header>
+<button id="burger" aria-label="Menu" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+<nav id="menu" aria-label="Sites">
+ <a href="#/sports"><i style="background:#1B63E0"></i>Sports</a><a href="#/movies"><i style="background:#7B2CBF"></i>Movies</a><a href="#/music"><i style="background:#E0359B"></i>Music</a><a href="#/software"><i style="background:#0B7285"></i>Software</a><a href="#/books"><i style="background:#8D5524"></i>Books &amp; Audio</a><a href="#/stocks"><i style="background:#2B8A3E"></i>Stocks</a><a href="#/trends"><i style="background:#F08C00"></i>Trending Topics</a><a href="#/deals"><i style="background:#D9480F"></i>Slickdeals</a><a href="#/diet"><i style="background:#1E9E5A"></i>Single Man&rsquo;s Diet</a>
+</nav>
+<div id="siteview"></div>
+<button id="totop" type="button" aria-label="Jump back to top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg> Top</button>
+<button id="back" type="button" aria-label="Return to main page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg> Main page</button>
+
+<main>
+ <div class="controls">
+  <div class="tabs" id="tabs"></div>
+  <div class="tabs" id="sorts"></div>
+  <div class="mono"><span id="count"></span></div>
+ </div>
+ <div class="srcs" id="srcs"></div>
+ <div class="loading" id="loading" role="status" hidden>Loading&hellip;</div>
+ <div class="grid" id="grid"></div>
+ <div id="more" style="min-height:1px;text-align:center;padding:10px 0 30px"><button class="btn" id="moreBtn" style="display:none"></button></div>
+</main>
+<script src="picks-store.js"></script>
+<script src="diet-shared.js"></script>
+<script>
+// ===== CONFIG: change repo names / branch here =====
+const U='mzaiger', BRANCH='main';
+const RAW=r=>`https://raw.githubusercontent.com/${U}/${r}/${BRANCH}/`;
+const SITEBASE=window.TS_BASE||'https://marcitech.is-a.dev/';
+const SITEURL=(key,sub)=>SITEBASE+SITE[key]+'/'+(sub||'');
+const SITE={diet:'SingleManDiet',trends:'TrendingTopics',movies:'Movies',music:'Music',software:'Software',books:'BooksAudio',stocks:'Stocks',deals:'SlickDealsTracker',sports:'SportsDashboard'};const TREND_FILES=[['social_media_trends.json','social_media'],['google_trends.json','google'],['reddit_trends.json','reddit']];
+const COLORS={diet:'#1E9E5A',deals:'#D9480F',sports:'#1B63E0',movies:'#7B2CBF',music:'#E0359B',software:'#0B7285',books:'#8D5524',stocks:'#2B8A3E',trends:'#F08C00'};
+const SLOTS=[['Breakfast',8],['Brunch',10],['Lunch',12],['Dinner',19],['Late dinner',22]];
+const DAY0=864e5;
+const WINS=[['1h',36e5,'1 hour'],['1d',DAY0,'1 day'],['1w',7*DAY0,'1 week'],['1m',30*DAY0,'1 month']];
+const SORTS=[['rank','Popular'],['new','Latest']];
+// ===== helpers =====
+const DAY=864e5; let now=Date.now();
+const gc=(k,f)=>{const m=document.cookie.match('(?:^|; )'+k+'=([^;]*)');try{return m?JSON.parse(decodeURIComponent(m[1])):f}catch{return f}};
+const sc=(k,v)=>{document.cookie=`${k}=${encodeURIComponent(JSON.stringify(v))};max-age=31536000;path=/;SameSite=Lax`};
+const hs=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return(h>>>0)/4294967296};
+const J=async u=>{try{const r=await fetch(u+'?v='+Math.floor(now/9e5));return r.ok?await r.json():null}catch{return null}};
+const pick=o=>({title:o.title||o.name||o.topic||o.query||o.meal||o.item||'',img:o.image||o.img||o.poster||o.thumb||o.logo||'',url:o.url||o.link||'',desc:o.desc||o.description||o.summary||''});
+const arr=(o,d=0)=>{if(Array.isArray(o)&&o.length>2&&o[0]&&typeof o[0]=='object'&&pick(o[0]).title)return o;if(o&&typeof o=='object'&&d<4)for(const v of Object.values(o)){const r=arr(v,d+1);if(r)return r}};
+const lim=(a,n)=>a.slice(0,n);
+let S={tab:gc('ts_tab','live'),sort:gc('ts_sort2','rank'),win:gc('ts_win','1w'),hide:gc('ts_hide',[])};
+if(!Array.isArray(S.hide))S.hide=[];
+if(!['live','fav'].includes(S.tab))S.tab='live';if(!['new','rank'].includes(S.sort))S.sort='new';if(!WINS.some(w=>w[0]==S.win))S.win='1w';
+let ITEMS=[],GSET=new Set(),SHOWN=60,LASTTOTAL=0,MROWS=[],MBOARD=[];const CUR=new Map(),MDET={};
+const dts=d=>{if(!d)return NaN;const m=String(d).match(/^(\d{4})-(\d\d)-(\d\d)$/);return m?new Date(+m[1],m[2]-1,+m[3],12).getTime():Date.parse(d)};
+// ===== favorites: same localStorage keys/formats as each site, so they show on the other pages =====
+const LSC=new Map();   // parsed storage values, kept only while one render runs (isFav is asked for every item, which re-parsed the same JSON thousands of times)
+const LS=(k,f)=>{if(LSC.has(k))return LSC.get(k);try{const v=localStorage.getItem(k);if(v==null)return f;const r=JSON.parse(v);LSC.set(k,r);return r}catch{return f}},LW=(k,v)=>{LSC.clear();try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const mut=(k,fb,fn)=>{const o=LS(k,fb);fn(o);LW(k,o)};
+const kM=i=>i.fk||('all:'+i.raw.id),kS=i=>i.fk||(i.f+':'+i.raw.id),kT=i=>i.sk+'|'+i.raw.id;
+const FAV={
+ movies:{is:i=>LS('movies_favs',[]).includes(i.raw.id),set:(i,on)=>mut('movies_favs',[],a=>{const x=new Set(a);on?x.add(i.raw.id):x.delete(i.raw.id);a.length=0;a.push(...x)})},
+ music:{is:i=>kM(i)in LS('music_favs',{}),set:(i,on)=>mut('music_favs',{},o=>{const k=kM(i);on?o[k]={...i.raw,rank:i.rank,src:'all'}:delete o[k]})},
+ stocks:{is:i=>LS('stocks_favs',[]).includes(i.raw.sym),set:(i,on)=>mut('stocks_favs',[],a=>{const x=new Set(a);on?x.add(i.raw.sym):x.delete(i.raw.sym);a.length=0;a.push(...x)})},
+ software:{is:i=>kS(i)in LS('software_favs2',{}),set:(i,on)=>mut('software_favs2',{},o=>{const k=kS(i);on?o[k]={...i.raw,src:i.f}:delete o[k]})},
+ books:{is:i=>kS(i)in LS('ba_favs',{}),set:(i,on)=>mut('ba_favs',{},o=>{const k=kS(i);on?o[k]={...i.raw,src:i.f}:delete o[k]})},
+ trends:{is:i=>kT(i)in LS('trending_favorites',{}),set:(i,on)=>mut('trending_favorites',{},o=>{const u=kT(i);on?o[u]={...i.raw,source:i.sk,uid:u}:delete o[u]})},
+ deals:{is:i=>i.raw.link in LS('slickdeals_favorites',{}),set:(i,on)=>mut('slickdeals_favorites',{},o=>{on?o[i.raw.link]=i.raw:delete o[i.raw.link]})}};
+const isFav=i=>FAV[i.src]?FAV[i.src].is(i):false;
+const SC={};
+const tsTrend=(o,l)=>Date.parse(l=='reddit'?(o.started_trending||o.first_seen):(o.published||o.started_trending||o.first_seen));
+// items favorited on the other sites that are not in today's data: rebuilt from the snapshots those sites saved
+function extras(){const out=[],have=new Set(ITEMS.map(x=>x.id));
+ for(const[k,v]of Object.entries(LS('music_favs',{})))if(v&&v.id&&!have.has('mu'+v.id)){const t=dts(v.date);out.push({id:'mu'+v.id,src:'music',raw:v,rank:v.rank||null,title:v.title,ts:isNaN(t)?now:t,fk:k})}
+ for(const[k,v]of Object.entries(LS('software_favs2',{})))if(v&&v.id&&SW[v.src]&&!have.has('sw'+v.src+v.id)){const t=dts(v.date);out.push({id:'sw'+v.src+v.id,src:'software',f:v.src,raw:v,rank:(v.ranks&&(v.ranks['12']??v.ranks['0']))||null,title:v.title,ts:isNaN(t)?now:t,fk:k})}
+ for(const v of Object.values(LS('trending_favorites',{})))if(v&&v.id&&v.source&&!have.has('tr'+v.source+v.id)){const t=tsTrend(v,v.source);out.push({id:'tr'+v.source+v.id,src:'trends',sk:v.source,raw:v,rank:+v.rank||null,title:v.topic,ts:isNaN(t)?now:t})}
+ for(const[k,v]of Object.entries(LS('ba_favs',{})))if(v&&v.id&&BAG[v.src]&&!have.has('ba'+v.src+v.id)){const t=dts(v.date);out.push({id:'ba'+v.src+v.id,src:'books',f:v.src,raw:v,rank:(v.ranks&&(v.ranks['12']??v.ranks['0']))||null,title:v.title,ts:isNaN(t)?now:t,fk:k})}
+ for(const v of Object.values(LS('slickdeals_favorites',{})))if(v&&v.link&&!have.has('dl'+v.link.slice(-50))){const t=Date.parse(v.pubDateIso);out.push({id:'dl'+v.link.slice(-50),src:'deals',raw:v,rank:null,title:v.title,ts:isNaN(t)?now:t})}
+ return out}
+// ===== loaders (each pushes items and re-renders as it arrives) =====
+let BOOT=true;   // while the sources are still loading, collect items and draw once (no tiles popping in, vanishing and shuffling)
+const add=(a)=>{ITEMS.push(...a);render()};
+async function monthLoad(ym){if(MDET[ym])return;MDET[ym]=new Map();const d=await J(RAW(SITE.movies)+`data/${ym}.json`);(d&&d.items||[]).forEach(m=>MDET[ym].set(m.id,m))}
+// a scores.json row can repeat an id (a re-dated release): the tile uses the row's own release date and scores, so it matches its rank
+function mvItem(row){const det=(MDET[row.release.slice(0,7)]||new Map()).get(row.id)||Object.values(MDET).map(m=>m.get(row.id)).find(Boolean);if(!det)return null;
+ return{id:`mv${row.id}_${row.release}`,src:'movies',raw:{...det,release:row.release,rt:row.rt,imdb:row.imdb,box:row.box,score:row.score},rank:row.rank||null,title:det.title,ts:dts(row.release)}}
+async function favMovies(){const have=new Set(ITEMS.filter(x=>x.src=='movies').map(x=>x.raw.id)),rows=[];
+ for(const id of LS('movies_favs',[])){if(have.has(id))continue;const r=MROWS.filter(x=>x.id===id).sort((a,b)=>(b.rank?1:0)-(a.rank?1:0)||(b.release>a.release?1:-1))[0];if(r)rows.push(r)}
+ for(const ym of new Set(rows.map(r=>r.release.slice(0,7))))await monthLoad(ym);add(rows.map(mvItem).filter(Boolean))}
+async function movies(){const sc=await J(RAW(SITE.movies)+'data/scores.json');if(!sc)return;
+ const c=Object.fromEntries(sc.cols.map((k,i)=>[k,i]));MROWS=sc.rows.map(r=>({id:r[c.id],release:r[c.release],rt:r[c.rt],imdb:r[c.imdb],box:r[c.box],score:r[c.score]})).filter(r=>r.release);
+ // the Movies site's overall board: last 3 months, a box office of $2M+ (or $1M+ with an RT or IMDb score) or both RT and IMDb, ranked by average score
+ const cut=new Date(now-3*30.44*DAY).toISOString().slice(0,10),h=v=>v!=null&&Number.isFinite(Number(v)),ok=m=>(h(m.box)&&(Number(m.box)>=2000000||(Number(m.box)>=1000000&&(h(m.rt)||h(m.imdb)))))||(h(m.rt)&&h(m.imdb));
+ MBOARD=MROWS.filter(m=>m.release>=cut&&ok(m)).sort((a,b)=>b.score-a.score||a.id-b.id);MBOARD.forEach((m,k)=>{m.rank=k+1});
+ const from=new Date(now-32*DAY).toISOString().slice(0,10),to=new Date(now+DAY).toISOString().slice(0,10),rows=MBOARD.filter(m=>m.release>=from&&m.release<=to);
+ await Promise.all([...new Set(rows.map(r=>r.release.slice(0,7)))].map(monthLoad));add(rows.map(mvItem).filter(Boolean));await favMovies()}
+async function music(){const d=await J(RAW(SITE.music)+'data/all.json');if(!d)return;
+ add(d.items.map((i,n)=>({id:'mu'+i.id,src:'music',raw:i,rank:i.rank||n+1,title:i.title,ts:i.date?dts(i.date):NaN})).filter(x=>!isNaN(x.ts)))}
+async function software(){for(const f of['github','steam','itunes']){const d=await J(RAW(SITE.software)+`data/${f}.json`);if(d)add(d.items.filter(i=>i.date).map((i,n)=>({id:'sw'+f+i.id,src:'software',f,raw:i,rank:(i.ranks&&(i.ranks['12']??i.ranks['0']))||n+1,title:i.title,ts:dts(i.date)})))}}
+async function booksAudio(){for(const f of['books','audiobooks','podcasts']){const d=await J(RAW(SITE.books)+`data/${f}.json`);if(d)add(d.items.filter(i=>i.date&&((i.ranks&&i.ranks['0'])||i.metric||999)<=20).map((i,n)=>({id:'ba'+f+i.id,src:'books',f,raw:i,rank:(i.ranks&&(i.ranks['12']??i.ranks['0']))||n+1,title:i.title,ts:dts(i.date)})))}}
+// Stocks: the Stocks site's overall board (All tab: a stock has to be on at least 2 of its 4 rankings, Gainers / Losers / Most Active / Buzz). The tile time is when the stock started trending.
+async function stocks(){const d=await J(RAW(SITE.stocks)+'data/board.json');if(!d||!d.stocks)return;
+ const w=String((d.windows||[])[0]||''),nw=!!(d.sources&&'l' in d.sources),   // new board.json rows are [gain,loss,active,buzz,all,seen]; the old ones [gain,active,buzz,all,seen]
+ rows=Object.entries(d.stocks).map(([sym,st])=>{let sc=(st.s||{})[w];if(sc&&!nw)sc=[sc[0],null,sc[1],sc[2],sc[3],sc[4]];return{sym,st,sc}}).filter(x=>x.sc);
+ const rk=n=>{const m=new Map();rows.filter(x=>(x.sc[n]||0)>0).sort((a,b)=>b.sc[n]-a.sc[n]||a.sym.localeCompare(b.sym)).forEach((x,k)=>m.set(x.sym,k+1));return m};   // rank on each of the site's tabs
+ const R=[0,1,2,3].map(rk),board=rows.filter(x=>(x.sc[4]||0)>0).sort((a,b)=>b.sc[4]-a.sc[4]||a.sym.localeCompare(b.sym));
+ add(board.map((x,k)=>({id:'st'+x.sym,src:'stocks',raw:{...x.st,sym:x.sym,rks:R.map(m=>m.get(x.sym)||0)},rank:k+1,title:(x.sym+' '+(x.st.n||'')).trim(),ts:Date.parse(x.st.since)})).filter(x=>!isNaN(x.ts)).slice(0,20))}   // only the top 20 of the Stocks All board
+const hid=s=>{let h=5381;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return h.toString(36)};
+async function deals(){try{const seenD=new Set();const r=await fetch(RAW(SITE.deals)+'deals.xml?v='+Math.floor(now/9e5));const x=new DOMParser().parseFromString(await r.text(),'text/xml');
+ const EX=new Map();try{const xr=new DOMParser().parseFromString(await(await fetch(RAW(SITE.deals)+'expired.xml?v='+Math.floor(now/9e5))).text(),'text/xml');xr.querySelectorAll('expiration').forEach(e=>{const t=(e.querySelector('title')?.textContent||'').trim(),rt=parseInt(e.querySelector('rating')?.textContent,10);if(t)EX.set(t,{expired:(e.querySelector('expired')?.textContent||'').trim().toLowerCase()==='true',rating:Number.isFinite(rt)?rt:null})})}catch{}   // expired.xml: which deals are expired + a fresher rating
+ const L=[...x.querySelectorAll('deal')].map(e=>{const g=t=>(e.querySelector(t)?.textContent||'').trim(),p=Date.parse(g('pubDateIso'));return{id:'dl'+hid(g('link')),src:'deals',title:g('title'),raw:{title:g('title'),link:g('link'),thumbnail:g('thumbnail'),rating:(EX.get(g('title'))?.rating??(+g('rating')||0)),expired:EX.get(g('title'))?.expired===true,description:g('description'),pubDateIso:g('pubDateIso')},ts:p}}).filter(i=>i.raw.link&&!isNaN(i.ts)&&!seenD.has(i.id)&&seenD.add(i.id));
+ [...L].sort((a,b)=>b.raw.rating-a.raw.rating||b.ts-a.ts).forEach((i,k)=>{i.rank=k+1});add(L)}catch{}}
+async function sports(){const SP={nfl:'nfl',nhl:'nhl',mlb:'mlb',nba:'nba',ncaaf:'cfb',ncaamb:'ncaamb'};for(const l of Object.keys(SP)){const d=await J(RAW(SITE.sports)+`data/${l}_dashboard.json`);if(!d)continue;const out=[],disp=new Set((l=='nfl'||l=='ncaaf'?PS.selectDisplayWeeks:PS.selectDisplayDays)(d.weeks||[],d.current_week).map(x=>x.week));
+ for(const w of d.weeks||[])for(const dy of w.days||[]){const gs=(dy.time_slots||[]).flatMap(sl=>sl.games||[]);if(!gs.length)continue;const pk=new Set([...gs].sort((a,b)=>(a.matchup_rank??1e9)-(b.matchup_rank??1e9)||(b.is_slot_pick?1:0)-(a.is_slot_pick?1:0)).slice(0,3));   // the day's top 3 matchups (matchup_rank is ranked across the whole day), not one or two per time slot
+  for(const g of gs){const t=Date.parse(g.start_time);if(!isNaN(t))out.push({id:'sp'+SP[l]+g.id,src:'sports',board:disp.has(w.week),pick:pk.has(g)?1:0,raw:g,sport:SP[l],rank:g.matchup_rank??null,title:`${g.away_abbr||g.away_team} @ ${g.home_abbr||g.home_team}`,ts:t})}}
+ add(out)}}
+async function scores(){for(const sp of['nfl','nhl','mlb','nba','cfb','ncaamb'])SC[sp]=await PS.fetchScores(sp);render()}
+async function trends(){for(const[f,l]of TREND_FILES){const d=await J(RAW(SITE.trends)+f);if(!d)continue;
+ add((d.items||[]).map(o=>({id:'tr'+l+o.id,src:'trends',sk:l,raw:o,rank:+o.rank||null,title:o.topic,ts:tsTrend(o,l)})).filter(x=>!isNaN(x.ts)))}}
+async function diet(){const b=RAW(SITE.diet),[f,c]=await Promise.all([J(b+'meals.json'),J(b+'candidate_pool.json')]);DS.loadPools(c,f);render()}
+// ===== diet: the meals come from the latest saved week of the Single Man's Diet planner (same browser storage as the planner) =====
+const SLOTH={'breakfast':8,'brunch':10,'lunch':12,'dinner':19,'late dinner':22};
+// Only days that carry a planner date (day.date, "YYYY-MM-DD") are used; weeks saved before dates existed are ignored.
+const ISO=x=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(x||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null};
+const wkNum=w=>parseInt(String(w&&w.label||'').replace(/\D/g,''),10);
+const hasDates=w=>!!(w&&Array.isArray(w.days)&&w.days.some(d=>ISO(d&&d.date)));
+// every dated saved week (highest-numbered first, so it wins when two weeks cover the same date); the unsaved current week only if no saved week has dates
+function dietPlans(){const sw=LS('singleManSavedWeeks',[]),out=[];
+ if(Array.isArray(sw))sw.forEach((w,i)=>{if(hasDates(w))out.push({tab:i,week:w,arr:sw,key:'singleManSavedWeeks',n:wkNum(w)})});
+ if(!out.length){const cw=LS('singleManCurrentWeek',null);if(hasDates(cw))out.push({tab:'current',week:cw,key:'singleManCurrentWeek',n:0})}
+ return out.sort((a,b)=>(b.n||0)-(a.n||0))}
+const wkOf=el=>el.closest('.day-card').dataset.wk;
+const dietPlan=wk=>dietPlans().find(P=>String(P.tab)===String(wk));
+const dietSave=P=>LW(P.key,P.arr||P.week);
+function dietItems(lo,hi,todayOnly){const Ps=dietPlans();if(!Ps.length)return[];const all=[],seen=new Set(),t0=new Date(now);t0.setHours(0,0,0,0);
+ for(const P of Ps){(P.week.days||[]).forEach((d,di)=>{const day=ISO(d&&d.date);if(!day)return;const dn=day.toLocaleDateString('en-US',{weekday:'long'}),ymd=`${day.getFullYear()}-${day.getMonth()+1}-${day.getDate()}`;
+  const tm1=new Date(t0);tm1.setDate(tm1.getDate()+1);if(todayOnly?day.getTime()!=t0.getTime():(day.getTime()!=t0.getTime()&&day.getTime()!=tm1.getTime()))return;   // today's and tomorrow's meals only
+  const slots=(d.slotOrder&&d.slotOrder.length?d.slotOrder:Object.keys(d.meals||{})).filter(sl=>d.meals&&d.meals[sl]&&SLOTH[sl]!=null);
+  for(const sl of slots){const k=ymd+'|'+sl;if(seen.has(k))continue;seen.add(k);const t=new Date(day);t.setHours(SLOTH[sl],0,0,0);const m=d.meals[sl];
+   all.push({id:`di${P.tab}-${di}-${sl}-${ymd}`,src:'diet',meal:m,wk:P.tab,day:di,slot:sl,desired:(d.pools&&d.pools[sl])||DS.getMealSource(m),title:DS.getMealName(m),ts:t.getTime(),today:day.getTime()==t0.getTime(),dn,dt:`${day.getMonth()+1}/${day.getDate()}/${day.getFullYear()}`})}})}
+ return all}
+function dietSelect(wk,di,slot){const P=dietPlan(wk);if(!P)return;const d=P.week.days[di];if(!d||!d.meals[slot])return;
+ try{localStorage.setItem('singleManPickRequest',JSON.stringify({tab:P.tab,dayIndex:di,slot,dayName:d.dayName,source:(d.pools&&d.pools[slot])||DS.getMealSource(d.meals[slot])}));localStorage.removeItem('singleManPickResult')}catch{alert("This browser won't let the page save the pick.");return}
+ openSite('diet','products.html?pick=1')}
+function dietEdit(wk,fn){const P=dietPlan(wk);if(P&&fn(P)){dietSave(P);render()}}
+// ===== tile renderers: same markup as each site's own page =====
+const ESC={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'},esc=x=>String(x??'').replace(/[&<>"']/g,c=>ESC[c]);
+const safeUrl=u=>{try{const x=new URL(u);return/^https?:$/.test(x.protocol)?x.href:''}catch{return''}};
+const fmtNum=n=>Number(n).toLocaleString('en-US'),cmp=n=>Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n);
+const fmtDate=d=>d?new Date(d+'T00:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'}):'';
+const money=v=>{if(v==null)return'\u2014';const k=Math.round(v/1e3);if(k>=1e6)return`$${Math.round(v/1e9)}B`;if(k>=1e3){const m=Math.round(v/1e6);return m>=1e3?`$${Math.round(v/1e9)}B`:`$${m}M`}return`$${k}K`};
+const rel=iso=>{const t=Date.parse(iso);if(isNaN(t))return'\u2014';const m=Math.max(0,Math.round((now-t)/6e4));return m<60?m+'m ago':m<1440?Math.floor(m/60)+'h ago':Math.floor(m/1440)+'d ago'};
+const favT=i=>`<label class="fav-toggle" title="Favorite"><input type="checkbox" class="fav-input" data-id="${esc(i.id)}" ${isFav(i)?'checked':''}><span class="fav-star">\u2605</span></label>`;
+const FB='onerror="this.outerHTML=\'<div class=&quot;thumb-fallback&quot;>No Image</div>\'"';
+const imgT=u=>{u=safeUrl(u);return u?`<img src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer" ${FB}>`:'<div class="thumb-fallback">No Image</div>'};
+const TS={social_media:{l:'Social Media',o:'Search posts \u2197'},google:{l:'Google',o:'Search Google \u2197',d:'google.com'},reddit:{l:'Reddit',o:'Open on Reddit \u2197',d:'reddit.com'}};
+// Trending tiles: Google / Reddit favicon links, and five favicon-only network searches on Social Media tiles (same as the TrendingTopics site)
+const NETS=[['facebook.com','Search Facebook',q=>`https://www.facebook.com/search/top?q=${q}`],['x.com','Search posts',q=>`https://x.com/search?q=${q}&src=typed_query`],['threads.com','Search Threads',q=>`https://www.threads.com/search?q=${q}`],['bsky.app','Search Bluesky',q=>`https://bsky.app/search?q=${q}`],['mastodon.social','Search Mastodon',q=>`https://mastodon.social/search?q=${q}`]],
+ tFav=d=>`<img class="fav-ico" src="https://www.google.com/s2/favicons?domain=${d}&sz=64" alt="" width="18" height="18" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">`,
+ tNets=it=>{const q=encodeURIComponent(it.topic||'');return`<span class="net-icons wide">${NETS.map(([d,n,u])=>`<a href="${esc(u(q))}" target="_blank" rel="noopener noreferrer" title="${n}" aria-label="${n}">${tFav(d)}<span class="net-arrow" aria-hidden="true">\u2197</span></a>`).join('')}</span>`};
+const chg=it=>{if(it.is_new)return'<span class="chg new">NEW</span>';const c=it.rank_change;if(typeof c!='number')return'';return c>0?`<span class="chg up">\u25b2 ${c}</span>`:c<0?`<span class="chg down">\u25bc ${-c}</span>`:'<span class="chg same">\u2013</span>'};
+const playUrl=it=>`https://play.google.com/store/search?q=${encodeURIComponent(it.title||'')}&c=apps`;
+const SW={github:{open:'Open on GitHub',d:'github.com',m:it=>`<b>\u2605 ${fmtNum(it.metric)}</b> stars`},steam:{open:'Open on Steam',d:'store.steampowered.com',m:it=>`<b>\u{1F3AE} ${fmtNum(it.metric)}</b> playing`},itunes:{open:'Open on App Store',d:'apps.apple.com',play:1,m:it=>`<b>Apple #${it.metric}</b> chart`}};
+const baq=it=>encodeURIComponent(`${it.title||''} ${it.author||''}`.trim());
+const BAL={amazon:{l:'Amazon',s:'Amazon',d:'amazon.com',u:it=>`https://www.amazon.com/s?k=${baq(it)}&i=stripbooks`},amazonAu:{l:'Amazon',s:'Amazon',d:'amazon.com',u:it=>`https://www.amazon.com/s?k=${baq(it)}&i=audible`},gbooks:{l:'Google Books',s:'Google',d:'books.google.com',u:it=>`https://www.google.com/books?q=${baq(it)}`},apple:{l:'Apple Books',s:'Apple',d:'books.apple.com',u:it=>it.url},applepod:{l:'Apple Podcasts',s:'Apple',d:'podcasts.apple.com',u:it=>it.url},goodreads:{l:'Goodreads',s:'Goodreads',d:'goodreads.com',u:it=>`https://www.goodreads.com/search?q=${baq(it)}`},audible:{l:'Audible',s:'Audible',d:'audible.com',u:it=>`https://www.audible.com/search?keywords=${baq(it)}`},spotify:{l:'Spotify',s:'Spotify',d:'spotify.com',u:it=>`https://open.spotify.com/search/${baq(it)}`},ytpod:{l:'YouTube',s:'YouTube',d:'youtube.com',u:it=>`https://www.youtube.com/results?search_query=${encodeURIComponent((it.title||'')+' podcast')}`},amzmusic:{l:'Amazon Music',s:'Amazon',d:'music.amazon.com',u:it=>`https://music.amazon.com/search/${baq(it)}`}};
+const BAG={books:[['amazon','gbooks'],['apple','goodreads']],audiobooks:[['audible','amazonAu'],['apple','spotify']],podcasts:[['applepod','spotify'],['ytpod','amzmusic']]};   // two lines of two buttons on every tile
+const baLinks=(it,f)=>`<div class="links">${BAG[f].map(g=>`<div class="link-line">${g.map(k=>{const x=BAL[k],u=safeUrl(x.u(it));return u?`<a class="open-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer" title="${esc(x.l)}"><img class="open-ico" src="https://www.google.com/s2/favicons?domain=${x.d}&sz=64" alt="" width="20" height="20" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span class="lbl">${x.l}</span> <span>\u2197</span></a>`:''}).join('')}</div>`).join('')}</div>`;
+const SPORTS=(()=>{const DISPLAY_TZ=PS.DISPLAY_TZ;
+const MULTI_WORD_MASCOTS = new Set(['Red Wings','Blue Jackets','Maple Leafs','Golden Knights','Trail Blazers','Blue Jays','Red Sox','White Sox','Crimson Tide','Fighting Irish','Golden Gophers','Scarlet Knights','Blue Devils','Tar Heels','Demon Deacons','Yellow Jackets','Horned Frogs','Red Raiders','Sun Devils','Nittany Lions','Golden Eagles','Green Wave','Blue Hens','Mean Green','Black Knights','Golden Flashes','Thundering Herd','Rainbow Warriors','Fighting Illini','Red Wolves','Blue Raiders','Golden Hurricane','Wolf Pack','Fighting Hawks','Mountain Hawks','Golden Bears','Red Storm','Blue Jays','Fighting Camels','Delta Devils','Ragin Cajuns','Runnin Rebels','Golden Panthers','Big Green','Crimson Hawks','Seminoles']);
+const LOGO_ON_WHITE = new Set(['Penn State Nittany Lions','Iowa Hawkeyes','Ohio State Buckeyes','Texas A&M Aggies','Cincinnati Bearcats','Utah State Aggies','Wake Forest Demon Deacons','Kansas State Wildcats','Michigan State Spartans','Nevada Wolf Pack','Nevada Wolfpack','New York Giants','New York Jets','Los Angeles Rams','Carolina Panthers','San Diego Padres','New York Yankees','Colorado Rockies','Detroit Tigers','Kansas City Royals','Minnesota Twins','Oakland Athletics','Athletics','Washington Capitals','Tampa Bay Lightning','Toronto Maple Leafs','Dallas Stars','Utah Jazz','California Golden Bears','Virginia Cavaliers','Charlotte 49ers','Rice Owls','Baylor Bears','TCU Horned Frogs','West Virginia Mountaineers','New Mexico State Aggies','Toledo Rockets','San Diego State Aztecs']);
+function fmtAmerican(n) {
+  if (n === null || n === undefined || n === '') return null;
+  const num = Number(n);
+  if (Number.isNaN(num)) return null;
+  return num > 0 ? `+${num}` : `${num}`;
+}
+function fmtLine(n) {
+  if (n === null || n === undefined || n === '') return null;
+  const num = Number(n);
+  if (Number.isNaN(num)) return null;
+  return num > 0 ? `+${num}` : `${num}`;
+}
+function oddsCell(entry) {
+  if (!entry || (entry.line === undefined && entry.american === undefined)) {
+    return '<span class="empty-cell">—</span>';
+  }
+  const line = fmtLine(entry.line);
+  const am = fmtAmerican(entry.american);
+  const negCls = (typeof entry.american === 'number' && entry.american < 0) ? 'neg' : '';
+  if (line !== null && am !== null) return `${line}<span class="num num-am ${negCls}">(${am})</span>`;
+  if (am !== null) return `<span class="num ${negCls}">${am}</span>`;
+  if (line !== null) return line;
+  return '<span class="empty-cell">—</span>';
+}
+function rankBadge(rank) {
+  // No rank -> keep an invisible badge of the same size so the logo/name/record
+  // columns don't shift between ranked and unranked teams.
+  return rank ? `<span class="rank">#${rank}</span> ` : '<span class="rank rank-empty" aria-hidden="true">#00</span> ';
+}
+function splitTeamName(name, location) {
+  if (!name) return ['', ''];
+  if (location && name.length > location.length + 1 && name.startsWith(location + ' ')) {
+    return [location, name.slice(location.length + 1)];
+  }
+  const words = name.split(' ');
+  if (words.length < 2) return [name, ''];
+  if (words.length > 2 && MULTI_WORD_MASCOTS.has(words.slice(-2).join(' '))) {
+    return [words.slice(0, -2).join(' '), words.slice(-2).join(' ')];
+  }
+  return [words.slice(0, -1).join(' '), words[words.length - 1]];
+}
+function teamNameBlock(name, record, scoreBadge, pitcher, logo, location) {
+  const recordHtml = record ? `<span class="team-record">${record}</span>` : '';
+  const [nameTop, nameBottom] = splitTeamName(name, location);
+  const nameHtml = nameBottom ? `<span class="tn-loc">${nameTop}</span> <span class="tn-mascot">${nameBottom}</span>` : nameTop;
+  const logoHtml = logo ? `<img class="team-logo${LOGO_ON_WHITE.has(name) ? ' logo-white' : ''}" src="${logo}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : '';
+  return `${logoHtml}<span class="team-name-wrap"><span class="team-name-line"><span class="team-name">${nameHtml}</span>${scoreBadge || ''}</span>${recordHtml}</span>`;
+}
+function kickoffTime(iso, tbd) {
+  if (tbd) return 'Time TBD';
+  try {
+    const d = new Date(iso);
+    const day = d.toLocaleDateString('en-US', { timeZone: DISPLAY_TZ, weekday: 'short', month: 'short', day: 'numeric' });
+    const time = d.toLocaleTimeString('en-US', { timeZone: DISPLAY_TZ, hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    return `${day} &middot; ${time}`;
+  } catch (e) { return ''; }
+}
+return(g,SPORT)=>{const gScore=SC[SPORT]?.[String(g.id)],marquee=g.home_rank&&g.away_rank,isPick=!!g.is_slot_pick,books=['draftkings','fanduel'],BL={draftkings:'DK',fanduel:'FD'},BC={draftkings:'dk',fanduel:'fd'};
+ const has=books.some(b=>['spread','moneyline','total'].some(m=>Object.keys(g.odds?.[b]?.[m]||{}).length));let rows='';
+ books.forEach(b=>{const s=g.odds?.[b]?.spread||{},m=g.odds?.[b]?.moneyline||{},t=g.odds?.[b]?.total||{};
+  const cc=(mk,sd,e)=>`${PS.pickCellClass(SPORT,g,mk,sd)} ${PS.oddsHitClass(SPORT,g.id,b,mk,sd,e,gScore)}`.trim();
+  rows+=`<tr><td class="book ${BC[b]}">${BL[b]}</td><td class="${cc('spread','away',s.away)}">${oddsCell(s.away)}</td><td class="${cc('spread','home',s.home)}">${oddsCell(s.home)}</td><td class="${cc('moneyline','away',m.away)}">${oddsCell(m.away)}</td><td class="${cc('moneyline','home',m.home)}">${oddsCell(m.home)}</td><td class="${cc('total','over',t.over)}">${oddsCell(t.over)}</td><td class="${cc('total','under',t.under)}">${oddsCell(t.under)}</td></tr>`});
+ const odds=has?`<table class="odds"><thead><tr><th></th><th>Away<br>Spd</th><th>Home<br>Spd</th><th>Away<br>ML</th><th>Home<br>ML</th><th>Over</th><th>Under</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="no-odds">Odds not yet posted</div>';
+ return `<div class="card ${marquee?'marquee':''} ${isPick?'slot-pick':''}">${isPick?'<div class="pick-banner"><svg class="i-star" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.8l2.5 5.4 5.9.7-4.4 4 1.2 5.8L10 14.8 4.8 17.7 6 11.9 1.6 7.9l5.9-.7z"/></svg>Time Slot Best Matchup</div>':''}<div class="card-top"><span class="score-badge">${PS.matchupLabel(g)}</span><span class="channel-pill">${PS.formatChannelForPill(g.channel)||''}</span></div><div class="matchup"><span class="team">${rankBadge(g.away_rank)}${teamNameBlock(g.away_team,g.away_record,PS.teamScoreBadge(gScore?.away_score,gScore?.status),undefined,g.away_logo,g.away_location)}</span><span class="at">@</span><span class="team">${rankBadge(g.home_rank)}${teamNameBlock(g.home_team,g.home_record,PS.teamScoreBadge(gScore?.home_score,gScore?.status),undefined,g.home_logo,g.home_location)}</span></div><div class="subline"><span>${kickoffTime(g.start_time,g.start_time_tbd)}</span><span class="venue"><span class="venue-name">${g.venue||''}</span>${g.venue&&g.venue_location?'<span class="venue-city">'+g.venue_location+'</span>':''}</span>${PS.renderLiveStatusLine(gScore)}</div>${odds}${PS.renderPickToolbar(SPORT,g,gScore)}${PS.renderGeminiBlock(g,SPORT)}</div>`}})();
+function heatClass(rating) {
+  if (rating >= 50) return 'hot';
+  if (rating >= 20) return 'warm';
+  return 'cool';
+}
+function heatColor(rating) {
+  if (rating >= 50) return 'var(--hot)';
+  if (rating >= 20) return 'var(--warm)';
+  return 'var(--cool)';
+}
+
+const relT=iso=>{const m=Math.max(0,Math.round((now-new Date(iso).getTime())/6e4));if(m<1)return'just now';if(m<60)return m+'m ago';const h=Math.floor(m/60);if(h<24)return h+'h '+(m%60)+'m ago';return Math.floor(h/24)+'d '+(h%24)+'h ago'};
+const SERVICES = [
+  { k:'netflix',   re:/netflix/,                         name:'Netflix',        domain:'netflix.com',        url:q => `https://www.netflix.com/search?q=${q}` },
+  { k:'hulu',      re:/^hulu/,                           name:'Hulu',           domain:'hulu.com',           url:() => 'https://www.hulu.com/search' },
+  { k:'disney',    re:/disney/,                          name:'Disney+',        domain:'disneyplus.com',     url:() => 'https://www.disneyplus.com/en-gb/browse/search' },
+  { k:'max',       re:/^max$|hbo/,                       name:'HBO Max',        domain:'hbomax.com', img:RAW(SITE.movies)+'img/hbo-max.png', url:q => `https://play.hbomax.com/search?q=${q}` },
+  { k:'prime',     re:/prime video|^amazon video|^amazon prime/, name:'Prime Video', domain:'primevideo.com', url:q => `https://www.amazon.com/s?k=${q}&i=instant-video` },
+  { k:'apple',     re:/^apple tv/,                       name:'Apple TV',       domain:'tv.apple.com',       url:q => `https://tv.apple.com/search?term=${q}` },
+  { k:'paramount', re:/paramount|showtime/,              name:'Paramount+',     domain:'paramountplus.com',  url:q => `https://www.paramountplus.com/search/?q=${q}` },
+  { k:'peacock',   re:/peacock/,                         name:'Peacock',        domain:'peacocktv.com',      url:() => 'https://www.peacocktv.com/watch/search' },
+  { k:'tubi',      re:/tubi/,                            name:'Tubi',           domain:'tubitv.com',         url:q => `https://tubitv.com/search/${q}` },
+  { k:'pluto',     re:/pluto/,                           name:'Pluto TV',       domain:'pluto.tv',           url:q => `https://pluto.tv/us/search/details?query=${q}` },
+  { k:'roku',      re:/roku/,                            name:'The Roku Channel', domain:'therokuchannel.roku.com', url:q => `https://therokuchannel.roku.com/search/${q}` },
+  { k:'youtube',   re:/youtube/,                         name:'YouTube',        domain:'youtube.com',        url:q => `https://www.youtube.com/results?search_query=${q}` },
+  { k:'crunchy',   re:/crunchyroll/,                     name:'Crunchyroll',    domain:'crunchyroll.com',    url:q => `https://www.crunchyroll.com/search?q=${q}` },
+  { k:'criterion', re:/criterion/,                       name:'Criterion Channel', domain:'criterionchannel.com', url:q => `https://www.criterionchannel.com/search?q=${q}` },
+  { k:'amc',       re:/^amc/,                            name:'AMC+',           domain:'amcplus.com', img:RAW(SITE.movies)+'img/amc-plus.png', url:q => `https://www.amcplus.com/search?q=${q}` },
+];
+
+function providerKey(name) {
+  return String(name).toLowerCase()
+    .replace(/\s+(amazon|apple tv|roku premium|youtube primetime)\s+channel$/, '')   // "Max Amazon Channel" -> "max"
+    .replace(/\s+apple tv$/, '')                                                     // "Acorn TV Apple TV" -> "acorn tv"
+    .replace(/\s+(standard |basic |premium )?with ads$/, '')                         // "Netflix Standard with Ads" -> "netflix"
+    .replace(/\s+(premium plus|premium|basic|standard|essential|select)$/, '')       // "Peacock Premium" -> "peacock"
+    .trim();
+}
+
+// One link per service, in TMDb's order. Services we have no search URL for share a single JustWatch link.
+function watchLinks(m) {
+  const t = encodeURIComponent(m.title), seen = new Set(), out = [];
+  let other = false;
+  (m.stream || []).forEach(n => {
+    const key = providerKey(n), sv = SERVICES.find(x => x.re.test(key));
+    if (!sv) { other = true; return; }
+    if (seen.has(sv.k)) return;
+    seen.add(sv.k);
+    out.push({ href: sv.url(t), domain: sv.domain, img: sv.img, name: sv.name });
+  });
+  if (other) out.push({ href: `https://www.justwatch.com/us/search?q=${t}`, domain: 'justwatch.com', name: 'JustWatch' });
+  return [{ href: `https://www.fandango.com/search?q=${t}`, domain: 'fandango.com', name: 'Fandango' }, ...out];   // tickets first, then the streaming services
+}
+
+
+// Stocks tile: same markup as the Stocks site (css/stocks.css is copied from it)
+function logoErr(img){const n=img.dataset.next;if(n){img.dataset.next='';img.src=n;return}const d=document.createElement('div');d.className='thumb-fallback';d.textContent=img.dataset.sym||'';img.replaceWith(d)}   // favicon -> company logo -> ticker letters
+const stkMoney=v=>v==null?'\u2014':v>=1e12?`$${(v/1e12).toFixed(v>=1e13?0:1)}T`:v>=1e9?`$${(v/1e9).toFixed(v>=1e10?0:1)}B`:v>=1e6?`$${(v/1e6).toFixed(v>=1e8?0:1)}M`:`$${Math.round(v/1e3)}K`;
+const stkShares=v=>v==null?'\u2014':v>=1e9?`${(v/1e9).toFixed(2)}B`:v>=1e8?`${Math.round(v/1e6)}M`:v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1e3?`${Math.round(v/1e3)}K`:String(Math.round(v));
+const stkCount=v=>v==null?'\u2014':v>=1e4?`${(v/1e3).toFixed(0)}K`:v>=1e3?`${(v/1e3).toFixed(1)}K`:String(v);
+const stkSign=v=>(v>0?'+':'')+v.toFixed(2)+'%',stkUsd=v=>v!=null?'$'+v.toFixed(2):'\u2014',stkPts=v=>v==null?'':(v>0?'+':'')+v.toFixed(2),stkArrow=v=>v>0?'\u25b2':v<0?'\u25bc':'',stkCls=v=>v>0?'up':v<0?'down':'';
+function stkTile(i){const st=i.raw,sym=st.sym,q=encodeURIComponent(sym),site=st.web?safeUrl(st.web):'',host=site?new URL(site).hostname:'';
+ const fav=d=>`https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=128`,logo=`https://images.financialmodelingprep.com/symbol/${q}.png`;
+ const icon=(href,src,name)=>`<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(name)}" aria-label="${esc(name)}"><img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode('${name[0]}'))"><span class="arrow">\u2197</span></a>`;
+ const links=[];if(site)links.push(icon(site,fav(host),'Company website'));
+ links.push(icon(`https://finance.yahoo.com/quote/${q}`,fav('finance.yahoo.com'),'Yahoo Finance'),icon(`https://www.tradingview.com/symbols/${encodeURIComponent(sym.replace('-','.'))}/`,fav('tradingview.com'),'TradingView'),icon(`https://stocktwits.com/symbol/${q}`,fav('stocktwits.com'),'StockTwits'),icon(`https://www.reddit.com/search/?q=%24${q}`,fav('reddit.com'),'Reddit'));
+ const surge=st.m!=null&&st.m24!=null?(st.m24===0?(st.m>0?'new':''):`${st.m>=st.m24?'\u25b2':'\u25bc'}${Math.abs(Math.round((st.m/st.m24-1)*100))}%`):'';
+ const stkChg=st.rc!=null?st.rc:st.c,rk=n=>`<span class="rk">${st.rks&&st.rks[n]?'#'+st.rks[n]:'\u2014'}</span>`;
+ const hasExt=!!(st.ext&&st.rp!=null),extName=st.ext=='pre'?'Pre':'AH',extFull=st.ext=='pre'?'Pre-market price and change':'After-hours price and change';
+ const regPrice=hasExt?st.rp:st.p,regPct=hasExt?st.rc:(st.rc!=null?st.rc:st.c);
+ const line=(px,d,pct,ext)=>`<div class="pline${ext?' ext':''}" title="${ext?extFull:(hasExt?'Regular-session price and change'+(st.ext=='pre'?' (the last close)':''):'Price and change since the previous close')}">${ext?`<i>${extName}</i>`:''}<span class="px">${stkUsd(px)}</span>${pct==null?'':`<span class="dlt ${stkCls(pct)}">${d==null?'':stkPts(d)+' '}${stkSign(pct)} ${stkArrow(pct)}</span>`}</div>`;
+ const priceBox=`<div class="pricebox">${line(regPrice,st.rch,regPct,false)}${hasExt?line(st.p,st.ech,st.ec,true):''}</div>`;
+ return`<article class="card"><div class="thumb-wrap"><img src="${esc(site?fav(host):logo)}" data-next="${esc(site?logo:'')}" data-sym="${esc(sym.slice(0,4))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="logoErr(this)">${favT(i)}<div class="rank-pill">#${i.rank}</div></div>
+ <div class="body"><div class="ticker-row"><p class="ticker"><a href="https://finance.yahoo.com/quote/${q}" target="_blank" rel="noopener noreferrer" title="Open ${esc(sym)} on Yahoo Finance">${esc(sym)}<span class="arrow" aria-hidden="true">\u2197</span></a></p></div>${priceBox}
+ <p class="name">${esc(st.n||'')}${st.mc?` \u00b7 ${stkMoney(st.mc)}`:''}</p>${st.why?`<p class="why">${esc(st.why)}</p>`:''}
+ <div class="chips"><div class="chip" title="The regular-session change, which Gainers and Losers are ranked on"><small>Chg</small><span class="val ${stkCls(stkChg)}">${stkChg==null?'\u2014':stkSign(stkChg)}</span>${rk(st.rks&&st.rks[0]?0:1)}</div>
+ <div class="chip" title="Shares traded today"><small>Volume</small><span class="val">${stkShares(st.v)}</span>${rk(2)}</div>
+ <div class="chip" title="Reddit mentions in the last 24 hours, and the change from the 24 hours before"><small>Buzz</small><span class="val">${stkCount(st.m)}${surge?`<span class="pct ${surge[0]=='\u25b2'?'up':surge[0]=='\u25bc'?'down':''}">${surge}</span>`:''}</span>${rk(3)}</div></div>
+ ${st.since?`<p class="when"><span class="ago">${relT(st.since)}</span></p>`:''}<div class="links" style="grid-template-columns:repeat(${links.length},minmax(0,1fr))">${links.join('')}</div></div></article>`}
+const TILE={
+trends:i=>{const it=i.raw,src=TS[i.sk]||{l:'',o:''},h=Math.max(0,(now-Date.parse(it.started_trending))/36e5),vol=it.volume_unit==='hours'?(h<1?'<1hr trend':Math.floor(h)+'hr trend'):(it.volume||'');
+ return`<article class="card"><div class="thumb-wrap">${imgT(it.image_url)}${favT(i)}<div class="rank-pill"><span>#${esc(it.rank)}</span>${chg(it)}</div></div><div class="body"><p class="title">${i.sk==='social_media'?esc(it.topic):`<a class="stretch" href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener noreferrer">${esc(it.topic)}</a>`}</p><p class="desc${it.description?'':' none'}">${it.description?esc(it.description):'No summary yet.'}</p><div class="meta-block"><div class="meta"><span class="when">${rel(it.published||it.started_trending)}</span><span class="vol">${esc(vol)||'\u2014'}</span></div>${i.sk==='social_media'?`<div class="meta icons-row">${tNets(it)}</div>`:`<div class="meta link-row"><span class="go"><a class="go-link" href="${esc(safeUrl(it.url))}" target="_blank" rel="noopener noreferrer">${src.d?tFav(src.d):''}<span>${esc(src.o)}</span></a></span></div>`}</div></div></article>`},
+movies:i=>{const m=i.raw,q=encodeURIComponent(m.title+(m.release?' '+m.release.slice(0,4):'')),fv=d=>`https://www.google.com/s2/favicons?domain=${d}&sz=64`,
+ imdb=/^tt\d+$/.test(m.imdb_id||'')?`https://www.imdb.com/title/${m.imdb_id}/`:`https://www.imdb.com/find/?q=${q}&s=tt`,
+ yt=safeUrl(m.trailer)||`https://www.youtube.com/results?search_query=${encodeURIComponent(m.title+' trailer')}`,
+ ic=(h,sr,n,lg)=>`<a href="${esc(h)}" target="_blank" rel="noopener noreferrer" title="${n}" aria-label="${n}"><img${lg?' class="logo"':''} src="${esc(sr)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(document.createTextNode('${n[0]}'))"><span class="arrow">\u2197</span></a>`,
+ chip=(l,v)=>`<div class="chip"><small>${l}</small>${v}</div>`,st=m.st===1||(Array.isArray(m.stream)&&m.stream.length>0),
+ th=fmtDate(m.theatrical||m.release)||'\u2014',sm=fmtDate(m.digital)||(st?'Available now':'');
+ return`<article class="card"><div class="thumb-wrap">${safeUrl(m.poster)?`<img src="${esc(safeUrl(m.poster))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;thumb-fallback&quot;>No Poster</div>'">`:'<div class="thumb-fallback">No Poster</div>'}${favT(i)}${st?`<div class="stream-pill" title="${esc(watchLinks(m).slice(1).map(w=>w.name).join(', '))}">`+'\u25b6 Streaming</div>':m.rentbuy?'<div class="stream-pill rent">Rent / Buy</div>':''}${i.rank?`<div class="rank-pill">#${i.rank}</div>`:''}</div><div class="body"><p class="title">${esc(m.title)}</p><p class="desc${m.overview?'':' none'} clamp">${m.overview?esc(m.overview):'No summary yet.'}</p><div class="chips">${chip('RT',m.rt==null?'\u2014':Math.round(m.rt)+'%')}${chip('IMDb',m.imdb==null?'\u2014':m.imdb.toFixed(1))}${chip('Box',money(m.box))}</div><p class="watch-label">Score Links and Trailer</p><div class="links scores">${ic(`https://www.rottentomatoes.com/search?search=${encodeURIComponent(m.title)}`,fv('rottentomatoes.com'),'Rotten Tomatoes')}${ic(imdb,fv('imdb.com'),'IMDb')}${ic(yt,fv('youtube.com'),'YouTube')}</div><p class="watch-label">Get Tickets or Stream On</p><div class="links watch">${watchLinks(m).map(w=>ic(w.href,w.img||fv(w.domain),w.name,!!w.img)).join('')}</div><p class="dates"><b>Theaters:</b> ${esc(th)}${sm?`<br><b>Streaming:</b> ${esc(sm)}`:''}</p></div></article>`},
+music:i=>{const it=i.raw,L=it.links||{},q=encodeURIComponent(`${it.title} ${it.artist}`),u=safeUrl(Object.values(L)[0]),
+ defs=[['spotify','Spotify',`https://open.spotify.com/search/${q}`,'open.spotify.com'],['itunes','Apple',`https://music.apple.com/us/search?term=${q}`,'music.apple.com'],['video','Video',`https://www.youtube.com/results?search_query=${q}`,'youtube.com'],['billboard','Billboard','','billboard.com']],
+ lf=d=>`<img class="lk-ico" src="https://www.google.com/s2/favicons?domain=${d}&sz=64" alt="" width="16" height="16" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">`,
+ lk=defs.map(([k,n,sr,dm])=>{const x=safeUrl(L[k]);return x?`<a class="lk" href="${esc(x)}" target="_blank" rel="noopener noreferrer">${lf(dm)}${n} \u2197</a>`:sr?`<a class="lk s" href="${esc(sr)}" target="_blank" rel="noopener noreferrer">${lf(dm)}${n} \u{1F50D}</a>`:''}).join(''),
+ r=it.ranks||{},m=it.metrics||{},c=[];if(r.spotify)c.push(`Spotify #${r.spotify}${m.spotify?' \u00b7 \u{1F3A7} '+cmp(m.spotify):''}`);if(r.billboard)c.push(`Hot 100 #${r.billboard}`);if(r.itunes)c.push(`Apple #${r.itunes}`);if(r.youtube)c.push(`YouTube #${r.youtube}${m.youtube?' \u00b7 \u25b6 '+cmp(m.youtube):''}`);
+ return`<article class="card"><div class="thumb-wrap all">${u?`<a class="thumb-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${imgT(it.image)}</a>`:imgT(it.image)}${favT(i)}<div class="rank-pill">#${i.rank}</div></div><div class="body"><p class="title">${esc(it.title)}</p><p class="artist">${esc(it.artist)}</p><p class="desc clamp">${esc(it.desc||'No description provided.')}</p><div class="links">${lk}</div><div class="meta"><span>${esc(fmtDate(it.date))}</span><span>${typeof it.metric=='number'?`<b>\u2605 ${it.metric.toFixed(1)}</b> score \u00b7 ${it.n}/${it.of} charts`:''}</span></div><div class="chips">${c.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div></div></article>`},
+sports:i=>SPORTS(i.raw,i.sport),
+deals:i=>{const d=i.raw,pct=Math.min(100,Math.max(6,(d.rating/250)*100)),hc=heatClass(d.rating),hk=heatColor(d.rating);
+ const th=d.thumbnail?`<img src="${esc(d.thumbnail)}" alt="" loading="lazy" onload="this.parentElement.style.aspectRatio=this.naturalWidth+'/'+this.naturalHeight" onerror="this.outerHTML='<div class=&quot;thumb-fallback&quot;>No Image</div>'">`:'<div class="thumb-fallback">No Image</div>';
+ return`<a class="card${d.expired?' is-expired':''}" href="${esc(d.link)}" target="_blank" rel="noopener noreferrer"><div class="thumb-wrap">${th}<label class="fav-toggle" title="Favorite" onclick="event.stopPropagation()"><input type="checkbox" class="fav-input" data-id="${esc(i.id)}" ${isFav(i)?'checked':''} onclick="event.stopPropagation()"><span class="fav-star">\u2605</span></label>${d.expired?'<div class="expired-badge"><span>Expired</span></div>':''}<div class="rating-pill">\u25b2 ${d.rating}</div></div><div class="body"><div class="heat-row"><div class="heat-meter"><div class="heat-fill ${hc}" style="width:${pct}%;background:${hk}"></div></div><span class="heat-count">${d.rating} thumbs</span></div><p class="title">${esc(d.title)}</p><div class="meta"><span>${relT(d.pubDateIso)}</span><span class="go"><img class="go-ico" src="https://www.google.com/s2/favicons?domain=slickdeals.net&sz=64" alt="" width="22" height="22" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span>View deal \u2197</span></span></div></div></a>`},
+diet:i=>{const meal=i.meal,src=DS.getMealSource(meal),desired=i.desired,pending=desired!==src,url=DS.getMealUrl(meal),image=DS.getMealImage(meal),fb=DS.getMealImageFallback(meal),cal=DS.getMealCalories(meal),serving=DS.getMealServing(meal),price=DS.getMealPrice(meal),pd=price==='N/A'?price:price+'*',name=DS.getMealName(meal),rest=DS.getMealRestaurant(meal),e=DS.escHtml,h=SLOTH[i.slot],tm=(h%12||12)+':00 '+(h<12?'AM':'PM');
+ const ti=image?`<img class="meal-thumb" src="${e(image)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-fallback="${e(fb||'')}" onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback)this.src=this.dataset.fallback">`:'<div class="meal-thumb meal-thumb-empty"></div>',
+ thumb=(src==='frozen'&&url)?`<a class="meal-thumb-link" href="${e(url)}" target="_blank" rel="noopener noreferrer">${ti}</a>`:`<div class="meal-thumb-link">${ti}</div>`,
+ links=src==='fast'?`<span class="deliv-group">${DS.deliveryIconsHtml(rest)}</span>`:DS.retailerChipsHtml(meal,'meal'),
+ rt=pending?`Pull a new meal from the ${DS.SEL_LABEL[desired].toLowerCase()} pool`:`Swap this meal for another within ${DS.REGEN_CALORIE_RANGE} calories of the original`,
+ regen=`<button type="button" class="regen-btn${pending?' needs-regen':''}" data-day="${i.day}" data-slot="${e(i.slot)}" title="${e(rt)}">regen</button>`,
+ pick=`<button type="button" class="regen-btn pick-btn" data-day="${i.day}" data-slot="${e(i.slot)}" title="Pick this meal by hand from the product list" aria-label="Select this meal by hand">select</button>`;
+ return`<div style="display:none">${DS.SM_SPRITE}</div><div class="day-card" data-wk="${i.wk}"><div class="day-header"><div class="day-name">${i.dn}<br><span class="day-date">${i.dt}</span></div><div class="day-header-totals"><div class="price">${tm}</div></div></div><div class="meal-row">${thumb}<div class="meal-info"><div class="meal-slot">${e(i.slot)}</div><div class="meal-name">${rest?`<span class="meal-brand">${e(rest)}</span>`:''}${e(name)}</div></div><div class="meal-money"><div class="meal-cal">${cal} cal*</div><div class="meal-price">${pd}</div><div class="meal-serving">Serving: ${e(serving)}</div>${DS.sourceControlHtml(i.day,i.slot,desired,src)}</div><div class="meal-actions${src==='frozen'?' frozen-actions':''}">${pick}${regen}${links}</div></div></div>`},
+books:i=>{const it=i.raw,url=safeUrl(it.url);
+ return`<article class="card"><div class="thumb-wrap ${i.f}">${url?`<a class="thumb-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${imgT(it.image)}</a>`:imgT(it.image)}${favT(i)}<div class="rank-pill">#${i.rank}</div></div><div class="body"><p class="title">${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(it.title)}</a>`:esc(it.title)}</p>${it.author?`<p class="author">${esc(it.author)}</p>`:''}<p class="desc clamp">${esc(it.desc||'No description provided.')}</p>${baLinks(it,i.f)}<div class="meta"><span>${esc(fmtDate(it.date))}</span><span><b>Apple #${esc(it.metric)}</b> chart</span></div></div></article>`},
+stocks:i=>stkTile(i),
+software:i=>{const it=i.raw,S2=SW[i.f],url=safeUrl(it.url);
+ return`<article class="card"><div class="thumb-wrap ${i.f}">${url?`<a class="thumb-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${imgT(it.image)}</a>`:imgT(it.image)}${favT(i)}<div class="rank-pill">#${i.rank}</div></div><div class="body"><p class="title">${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(it.title)}</a>`:esc(it.title)}</p><p class="desc clamp">${esc(it.desc||'No description provided.')}</p><div class="sw-links">${url?`<a class="open-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="open-ico" src="https://www.google.com/s2/favicons?domain=${S2.d}&sz=64" alt="" width="20" height="20" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">${S2.open} <span>\u2197</span></a>`:''}${S2.play?`<a class="open-link" href="${esc(playUrl(it))}" target="_blank" rel="noopener noreferrer" title="Search Google Play"><img class="open-ico" src="https://www.google.com/s2/favicons?domain=play.google.com&sz=64" alt="" width="20" height="20" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">Search Google Play <span>\u2197</span></a>`:''}</div><div class="meta"><span>${esc(fmtDate(it.date))}</span><span>${S2.m(it)}</span></div></div></article>`}};
+// ===== render =====
+const ago=t=>{const m=Math.round((t-now)/6e4),a=Math.abs(m);const s=a<60?a+'m':a<1440?Math.round(a/60)+'h':Math.round(a/1440)+'d';return m>0?'in '+s:s+' ago'};
+const SHEETS={};let READY=false;const BASE=new CSSStyleSheet();
+BASE.replaceSync(':host{display:block}.tile-body{background:none!important;min-height:0!important;margin:0!important;padding:0!important;display:block!important}.tl-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;border-radius:10px 10px 0 0;background:linear-gradient(100deg,#2a0a4a,#6a11cb 58%,#8e2de2);color:#fff;font:600 12px Oswald,sans-serif;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;white-space:nowrap}.tl-top em{font-style:normal;font-weight:500;opacity:.85}.tl-top:hover{filter:brightness(1.2)}.tl-go{opacity:.85;font-size:13px}.tl-top~.card,.tl-top~.day-card{border-top-left-radius:0!important;border-top-right-radius:0!important;margin-top:0!important}.tl-top~.card .pick-banner{border-radius:0!important}');
+async function sheets(){await Promise.all(Object.keys(TILE).map(async k=>{try{const t=await(await fetch(`css/${k}.css`)).text(),sh=new CSSStyleSheet();sh.replaceSync(t);SHEETS[k]=sh}catch{SHEETS[k]=new CSSStyleSheet()}}));READY=true;render()}
+const HOSTS=new Map();
+const SPAGE={cfb:'index.html',ncaamb:'ncaamb.html',nfl:'nfl.html',mlb:'mlb.html',nba:'nba.html',nhl:'nhl.html'};   // SportsDashboard page for each sport (college football is its index.html)
+const SPORTL={nfl:'NFL',cfb:'College Football',nhl:'NHL',nba:'NBA',mlb:'MLB',ncaamb:'College Basketball'};
+const SUBS={social_media:'Social Media',google:'Google',reddit:'Reddit',github:'GitHub',steam:'Steam',itunes:'App Store',books:'Books',audiobooks:'Audio Books',podcasts:'Podcasts'},SPN={cfb:'ncaaf'};
+const NAMES={movies:'Movies',music:'Music',software:'Software',books:'Books & Audio',stocks:'Stocks',trends:'Trending Topics',deals:'Slickdeals',sports:'Sports',diet:'Single Man\u2019s Diet'};
+const subOf=i=>i.src=='trends'?SUBS[i.sk]:(i.src=='software'||i.src=='books')?SUBS[i.f]:i.src=='sports'?SPORTL[i.sport]:i.src=='diet'?(DS.getMealSource(i.meal)=='frozen'?'Frozen':'Fast Food'):'';
+let tileDrag=null;const srcPtr=(sl,e)=>{const r=sl.getBoundingClientRect();return(r.width&&(e.clientX-r.left)/r.width>=.5)?'fast':'frozen'};
+function host(i){let h=HOSTS.get(i.id);if(h)return h;h=document.createElement('div');h.className='tile';const r=h.attachShadow({mode:'open'});r.adoptedStyleSheets=[SHEETS[i.src],BASE];
+ r.addEventListener('change',e=>{const t=e.target;if(t.classList&&t.classList.contains('fav-input')){const it=CUR.get(t.dataset.id);if(it&&FAV[it.src])FAV[it.src].set(it,t.checked)}});
+ r.addEventListener('click',e=>{const t=e.target;if(!t.closest)return;
+  const ic=t.closest('.day-card .src-ic');if(ic){const c=ic.closest('.src-ctl');dietEdit(wkOf(c),P=>DS.setPool(P.week,+c.dataset.day,c.dataset.slot,ic.dataset.src));return}
+  const pb=t.closest('.day-card .pick-btn');if(pb){dietSelect(wkOf(pb),+pb.dataset.day,pb.dataset.slot);return}
+  const rb=t.closest('.day-card .regen-btn');if(rb){dietEdit(wkOf(rb),P=>{const ok=DS.regen(P.week,+rb.dataset.day,rb.dataset.slot);if(!ok)alert('No replacement meal found (the meal lists may still be loading).');return ok});return}
+  const d=t.closest('.desc');if(d&&!t.closest('a'))d.classList.toggle('clamp')});
+ r.addEventListener('pointerdown',e=>{const sl=e.target.closest&&e.target.closest('.day-card .src-slider');if(!sl)return;e.preventDefault();tileDrag={sl,start:sl.dataset.src};try{sl.setPointerCapture(e.pointerId)}catch{}sl.dataset.src=srcPtr(sl,e)});
+ r.addEventListener('pointermove',e=>{if(tileDrag)tileDrag.sl.dataset.src=srcPtr(tileDrag.sl,e)});
+ const endDrag=(e,cancel)=>{if(!tileDrag)return;const{sl,start}=tileDrag;tileDrag=null;const c=sl.closest('.src-ctl'),nx=cancel?start:srcPtr(sl,e);sl.dataset.src=nx;if(nx!==start)dietEdit(wkOf(c),P=>DS.setPool(P.week,+c.dataset.day,c.dataset.slot,nx))};
+ r.addEventListener('pointerup',e=>endDrag(e,false));r.addEventListener('pointercancel',e=>endDrag(e,true));
+ r.addEventListener('keydown',e=>{const sl=e.target.closest&&e.target.closest('.day-card .src-slider');if(!sl)return;const c=sl.closest('.src-ctl');let nx=null;
+  if(['ArrowLeft','ArrowDown','Home'].includes(e.key))nx='frozen';else if(['ArrowRight','ArrowUp','End'].includes(e.key))nx='fast';else if(e.key===' '||e.key==='Enter')nx=sl.dataset.src==='fast'?'frozen':'fast';
+  if(!nx)return;e.preventDefault();dietEdit(wkOf(c),P=>DS.setPool(P.week,+c.dataset.day,c.dataset.slot,nx))});
+ PS.attachPickHandlers(r,render);PS.attachGeminiHandlers(r);h._r=r;HOSTS.set(i.id,h);return h}
+// what the Live stream holds for a time filter W (before the source chips)
+function liveList(W){const lo=now-W,hi=now+Math.min(W,DAY/2),eod=new Date(now);eod.setHours(23,59,59,999);
+ // trending feeds ignore the time window: social = top 20, Reddit = top 25 (by rank); Google = past hour (up to 25) + top 20 of the whole JSON, deduped
+ const byRk=k=>ITEMS.filter(i=>i.src=='trends'&&i.sk==k).sort((a,b)=>(a.rank||1e6)-(b.rank||1e6)),addT=i=>{const t=Date.parse(i.raw.started_trending||i.raw.first_seen);return isNaN(t)?i.ts:t};
+ GSET=new Set([...byRk('social_media').slice(0,20),...byRk('reddit').slice(0,25),...byRk('google').filter(i=>addT(i)>=now-36e5).slice(0,25),...byRk('google').slice(0,20)].map(i=>i.id));
+ // Slickdeals ignore the time window: deals from the past 2 hours + the top 20 overall by rank (deduped)
+ const DSET=new Set(ITEMS.filter(i=>i.src=='deals'&&(i.rank<=20||i.ts>=now-2*36e5)).map(i=>i.id));
+ const all=ITEMS.filter(i=>i.src=='sports'?(i.board&&i.pick&&i.ts>=lo&&i.ts<=eod.getTime()+DAY):i.src=='movies'?(i.rank!=null&&i.ts>=lo&&i.ts<=hi):i.src=='trends'?GSET.has(i.id):i.src=='deals'?DSET.has(i.id):(i.ts>=lo&&i.ts<=hi));
+ all.push(...dietItems(lo,now+W,false));return all}
+// the header line: titles of what landed on the board in the last hour
+function ticker(){let L=liveList(36e5).filter(i=>i.ts<=now&&i.ts>=now-36e5);if(!L.length)L=liveList(DAY).filter(i=>i.ts<=now);
+ L.sort((a,b)=>b.ts-a.ts);const w=L.slice(0,40).map(i=>String(i.title||'').replace(/\s+/g,' ').trim().slice(0,44).toUpperCase()).filter(Boolean);
+ if(!w.length)return;const t=w.join('  \u2605  ')+'  \u2605  ';if(t===ticker.last)return;ticker.last=t;const u=t.repeat(Math.max(1,Math.ceil(260/t.length)));document.getElementById('mq').textContent=u+u}
+function slope(){const hd=document.querySelector('.disco'),el=document.getElementById('slope');if(!hd||!el)return;
+ const W=hd.clientWidth||innerWidth,mob=matchMedia('(max-width:700px)').matches,rise=mob?22:Math.round(Math.max(18,Math.min(32,W*.04)));
+ slope.rise=rise;   // the slanted edge itself is static CSS (clip-path never changes after load: iOS Safari can leave a changed clip-path unpainted until something forces a reflow)
+ el.style.width=Math.ceil(Math.hypot(W,rise)+30)+'px';el.style.transform=el.style.webkitTransform=`rotate(${-Math.atan2(rise,W)}rad)`}
+// Mixing: instead of every source's #1 tile, then every #2, grouped by source, the sources take turns (one tile each, in a random source order per round).
+// The randomness is seeded by the clock, so it holds still for 4 hours and then reshuffles. Each source keeps its own order (by rank or by time).
+const rng=seed=>{let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}};
+const blockKey=ms=>{const d=new Date(ms);return((d.getFullYear()*12+d.getMonth())*31+d.getDate())*6+Math.floor(d.getHours()/4)};   // local 4-hour block: 0-4, 4-8, ... (never crosses midnight)
+function mix(items,seed){const by=new Map();for(const i of items){if(!by.has(i.src))by.set(i.src,[]);by.get(i.src).push(i)}
+ const qs=[...by.values()],out=[];let round=0;
+ while(qs.some(q=>q.length)){const live=qs.filter(q=>q.length),r=rng(Math.imul(seed,7919)+round++);
+  for(let k=live.length-1;k>0;k--){const j=Math.floor(r()*(k+1));[live[k],live[j]]=[live[j],live[k]]}
+  for(const q of live)out.push(q.shift())}
+ return out}
+// date order stays, but only between 4-hour blocks: inside a block the sources are mixed
+function mixBlocks(sorted){const out=[];let cur=[],key=null;for(const i of sorted){const k=blockKey(i.ts);if(cur.length&&k!==key){out.push(...mix(cur,key));cur=[]}key=k;cur.push(i)}if(cur.length)out.push(...mix(cur,key));return out}
+// Stable order: once the first draw is done, tiles never move. When a JSON feed updates (or the clock moves a window / the 4-hour mix seed), tiles that are
+// already on the page keep their place and their own order; tiles that dropped out simply vanish; new tiles are slotted in by date (Latest) or added at the end (Popular).
+// The order is rebuilt only on page load or when the tab, sort or a source chip changes.
+let ORD={},SETTLED=false;
+function stabilize(all){if(!SETTLED)return all;const key=S.tab+'|'+S.sort+'|'+S.hide.join(','),prev=ORD[key];
+ if(!prev){ORD[key]=all.map(i=>i.id);return all}
+ const by=new Map(all.map(i=>[i.id,i])),out=[];
+ for(const id of prev)if(by.has(id)){out.push(by.get(id));by.delete(id)}
+ for(const n of all){if(!by.has(n.id))continue;by.delete(n.id);
+  if(S.sort=='new'){const k=out.findIndex(x=>x.ts<n.ts);k<0?out.push(n):out.splice(k,0,n)}else out.push(n)}
+ ORD[key]=out.map(i=>i.id);return out}
+// simple loading screen: the old tiles are hidden the moment you click (display:none, nothing is torn down yet), "Loading..." shows, the browser paints,
+// and only then are the tiles built. LOADING stops infinite scroll and the minute timer from drawing early.
+let LTOK=0,RENDERS=0,LOADING=0;
+function showLoading(){document.getElementById('grid').style.display='none';document.getElementById('loading').hidden=false;document.getElementById('count').textContent='';document.getElementById('moreBtn').style.display='none'}
+function hideLoading(){document.getElementById('grid').style.display='';document.getElementById('loading').hidden=true}
+const toControls=()=>scrollTo({top:Math.max(0,document.querySelector('.controls').offsetTop-8)});
+const nextPaint=()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r,30)));   // resolves right after the browser has painted
+async function renderSoon(pre){const t=++LTOK;LOADING=1;showLoading();toControls();   // 1. old tiles out of sight, "Loading..." in (the new choice is already blue: ui() ran first)
+ await nextPaint();await new Promise(r=>setTimeout(r,120));   // 2. let it show for a moment, even when the draw itself would be quick
+ if(t!==LTOK)return;const m=RENDERS;if(pre){try{await pre()}catch{}}   // pre (Favorites: fetch saved movies) draws by itself through add()
+ if(t!==LTOK)return;LOADING=0;if(RENDERS===m)render();hideLoading();toControls()}   // 3. tiles come up
+function render(){if(!READY||BOOT)return;LSC.clear();setTimeout(()=>LSC.clear(),0);now=Date.now();const W=30*DAY0,lo=now-W,hi=now+Math.min(W,DAY/2),fav=S.tab=='fav';let all;
+ if(fav)all=[...ITEMS,...extras(),...dietItems(lo,hi,true)].filter(i=>isFav(i)||(i.src=='diet'&&i.today)||(i.src=='sports'&&PS.hasAnyPick(i.sport,i.raw.id)));
+ else all=liveList(W);
+ all=all.filter(i=>!S.hide.includes(i.src));
+ // nothing dated tomorrow shows until 6pm tonight (the page re-renders every minute, so it appears by itself at 6)
+ if(new Date(now).getHours()<18){const a=new Date(now);a.setHours(0,0,0,0);a.setDate(a.getDate()+1);const b=new Date(a);b.setDate(b.getDate()+1);all=all.filter(i=>!(i.ts>=a.getTime()&&i.ts<b.getTime()))}
+ if(S.sort=='new'){all.sort((a,b)=>b.ts-a.ts);all=mixBlocks(all)}
+ else{const dI=all.filter(i=>i.src=='diet'),cl=[...dI].sort((a,b)=>Math.abs(a.ts-now)-Math.abs(b.ts-now))[0],dk=x=>x===cl?-1:x.ts>cl.ts?x.ts-cl.ts:1e13+(cl.ts-x.ts);   // closest meal first (before or after now), then forward in time only; earlier meals trail
+  dI.sort((a,b)=>dk(a)-dk(b)).forEach((x,k)=>{x.rk=k+1});all.forEach(i=>{if(i.src!='diet')i.rk=i.rank||1e6});
+  all.sort((a,b)=>a.rk-b.rk||b.ts-a.ts);all=mix(all,blockKey(now))}   // ranking order inside each source (the most recent wins a tie); the sources take turns, reshuffled every 4 hours
+ all=stabilize(all);LASTTOTAL=all.length;render.all=all;document.getElementById('count').textContent=all.length+' tiles';
+ const list=all.slice(0,SHOWN);CUR.clear();list.forEach(i=>CUR.set(i.id,i));
+ const out=[];let lastDay='';const t0=new Date(now);t0.setHours(0,0,0,0);
+ for(const i of list){if(!TILE[i.src])continue;
+  if(S.sort=='new'){const dd=new Date(i.ts);dd.setHours(0,0,0,0);const dk=dd.getTime();if(dk!==lastDay){lastDay=dk;const df=Math.round((dk-t0.getTime())/DAY),dv=document.createElement('div');dv.className='daydiv';dv.innerHTML=(df==0?'Today':df==1?'Tomorrow':df==-1?'Yesterday':dd.toLocaleDateString('en-US',{weekday:'long'}))+`<small>${dd.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</small>`;out.push(dv)}}
+  const sub=subOf(i),h=host(i),html=`<div class="tile-body${i.src=='sports'?' light-theme':''}"${i.src=='sports'?` data-sport="${SPN[i.sport]||i.sport}"`:''}><a class="tl-top" href="#/${i.src}${i.src=='sports'?'/'+(SPAGE[i.sport]||'index.html'):''}" title="Open ${NAMES[i.src]}${sub?' \u00b7 '+sub:''} here"><span>${NAMES[i.src]}${sub?` <em>\u00b7 ${sub}</em>`:''}</span><span class="tl-go">\u2197</span></a>${TILE[i.src](i)}</div>`;
+  if(h._h!==html){h._r.innerHTML=html;h._h=html}h.dataset.src=i.src;h.classList.remove('w2');out.push(h)}
+ document.getElementById('grid').replaceChildren(...new Set(out));RENDERS++;if(!LOADING)hideLoading();ticker();
+ const mb=document.getElementById('moreBtn');mb.style.display=SHOWN<LASTTOTAL?'inline-block':'none';mb.textContent=`Load more (${LASTTOTAL-SHOWN} left)`;
+ if(!render.t)render.t=setTimeout(()=>{render.t=0;const m=document.getElementById('more').getBoundingClientRect();if(m.top<innerHeight+900&&SHOWN<LASTTOTAL){SHOWN+=60;render()}},60)}
+function ui(){const btn=(a,k,v,n)=>`<button class="tab ${S[k]==v?'on':''}" data-${a}="${v}">${n}</button>`;
+ document.getElementById('tabs').innerHTML=[['live','Live stream'],['fav','Favorites']].map(([v,n])=>btn('tab','tab',v,n)).join('');
+ document.getElementById('sorts').innerHTML=SORTS.map(([v,n])=>btn('sort','sort',v,n)).join('');
+ document.getElementById('srcs').innerHTML=['sports','movies','music','software','stocks','books','trends','deals','diet'].map((k,n)=>`<button class="chip2 ${S.hide.includes(k)?'':'on'}" data-hide="${k}"${S.hide.includes(k)?'':` style="background:${COLORS[k]}"`}>${({deals:'Deals',diet:'Diet'})[k]||NAMES[k]}</button>`).join('');}
+document.addEventListener('click',e=>{const t=e.target,d=t.dataset;if(!d)return;let ch=0,pre=null;
+ if(d.tab){S.tab=d.tab;sc('ts_tab',S.tab);ch=1;if(S.tab=='fav'&&!BOOT)pre=favMovies}
+ if(d.sort){S.sort=d.sort;sc('ts_sort2',S.sort);ch=1}
+ if(d.win){S.win=d.win;sc('ts_win',S.win);ch=1}
+ if(d.hide){const k=d.hide,i=S.hide.indexOf(k);i<0?S.hide.push(k):S.hide.splice(i,1);sc('ts_hide',S.hide);ch=1}
+ if(ch){ORD={};SHOWN=24;ui();renderSoon(pre)}});
+let busy=0;const more=()=>{if(busy||LOADING||SHOWN>=LASTTOTAL)return;busy=1;SHOWN+=60;render();setTimeout(()=>{busy=0},200)};
+new IntersectionObserver(es=>{if(es.some(x=>x.isIntersecting))more()},{rootMargin:'900px'}).observe(document.getElementById('more'));
+addEventListener('scroll',()=>{if(innerHeight+scrollY>document.documentElement.scrollHeight-1400)more()},{passive:true});
+document.getElementById('moreBtn').onclick=more;
+
+// ===== menu + in-page viewer: the other sites open in an iframe under the Trendslope header =====
+let MAINY=0;const sv=document.getElementById('siteview');
+// each site's own mobile scale (its viewport tag's initial-scale), vs this page's 1.0
+const SITEBG={movies:'#FFFFFF',music:'#FFFFFF',software:'#FFFFFF',books:'#FFFFFF',stocks:'#FFFFFF',trends:'#FFFFFF',deals:'#FFFFFF',sports:'#0d1322',diet:'#EEF2F0'},paint=c=>{document.documentElement.style.background=document.body.style.background=c||''};   // each site's own page color fills the strip under the slope, so the page drops in below it seamlessly
+// banner scroll-away: plain top / margin offsets (no transforms or custom properties, which iOS Safari mishandles together with clip-path)
+const shiftHdr=px=>{const hd=document.querySelector('.disco'),b=document.getElementById('burger'),m=document.getElementById('menu'),t=px?-px+'px':'';
+ hd.style.top=t;b&&(b.style.marginTop=t);m&&(m.style.marginTop=t)};
+let FOLLOW=0;
+const sportsBg=()=>{try{return getEffectiveTheme()==='light'?'#f5f7fc':'#0d1322'}catch{return '#0d1322'}};   // Sports follows its own dark/light choice (same fb_theme setting, same origin)
+const SITESCALE={movies:.8,music:.8,software:.8,books:.62,stocks:.75,trends:.75,deals:.6,sports:.85,diet:1},PSCALE=1,isMob=()=>matchMedia('(hover:none) and (pointer:coarse) and (max-width:700px)').matches;   // scaling is for phones only, never desktop
+function openSite(key,sub){location.hash='#/'+key+(sub?'/'+sub:'')}
+// a fresh iframe each time (its first load replaces the blank page instead of adding browser-history steps)
+function showSite(key,sub){const url=SITEURL(key,sub);if(!document.body.classList.contains('site-mode')){MAINY=scrollY;document.body.classList.add('site-mode')}
+ const cur=sv.firstElementChild;if(!cur||cur.dataset.u!==url){const f=document.createElement('iframe');f.dataset.u=url;f.title=NAMES[key];f.src=url;
+  const s=SITESCALE[key],k=s/PSCALE,mobile=isMob();if(mobile&&s&&Math.abs(k-1)>.01)f.style.cssText=`inset:auto;top:0;left:0;width:${100/k}%;height:${100/k}%;transform:scale(${k});transform-origin:0 0`;   // lay the site out at its own width, then scale it to fit
+  const sk=(mobile&&s&&Math.abs(k-1)>.01)?k:1;
+  cancelAnimationFrame(FOLLOW);
+  f.addEventListener('load',()=>{try{const w=f.contentWindow,hd=document.querySelector('.disco'),root=w.document.documentElement;
+   const onBody=['movies','music','software','books','stocks','trends','deals'].includes(key),tgt=onBody?w.document.body:root,base=onBody?(parseFloat(w.getComputedStyle(tgt).paddingTop)||0):0;   // those sites paint their slight blue glow on <body>, so the space under the banner goes on <body> too (on <html> it would show plain white)
+   const pad=()=>{const extra=document.body.dataset.site=='diet'?(slope.rise||0):0;tgt.style.paddingTop=(base+(hd.offsetHeight-extra)/sk)+'px'};   // the site starts just under the banner...
+   pad();addEventListener('resize',pad);
+   cancelAnimationFrame(FOLLOW);
+   const tick=()=>{try{const y=Math.max(0,w.scrollY||root.scrollTop||0);shiftHdr(Math.min(y*sk,hd.offsetHeight))}catch{}FOLLOW=requestAnimationFrame(tick)};tick()}catch{}});   // ...and the banner moves up exactly as far as the site scrolls (same origin; read every frame so it stays smooth even when iOS delays scroll events)
+  if(key=='sports')f.addEventListener('load',()=>{try{const b=f.contentDocument.body,sync=()=>paint(getComputedStyle(b).getPropertyValue('--bg').trim()||(b.classList.contains('light-theme')?'#f5f7fc':'#0d1322'));sync();new MutationObserver(sync).observe(b,{attributes:true,attributeFilter:['class']})}catch{}});   // follow the theme toggle inside the frame
+  sv.replaceChildren(f)}
+ document.body.dataset.site=key;paint(key=='sports'?sportsBg():key=='diet'?'':SITEBG[key]);slope.k='';scrollTo(0,0);slope();shiftHdr(0);setTimeout(slope,60)}
+function showMain(){if(!document.body.classList.contains('site-mode'))return;document.body.classList.remove('site-mode');delete document.body.dataset.site;cancelAnimationFrame(FOLLOW);paint('');shiftHdr(0);sv.replaceChildren();slope.k='';slope();render();scrollTo(0,MAINY)}
+function route(){const m=location.hash.match(/^#\/(\w+)(?:\/(.*))?$/);if(m&&SITE[m[1]])showSite(m[1],m[2]||'');else showMain()}
+addEventListener('hashchange',route);
+document.getElementById('back').onclick=()=>{history.replaceState(null,'',location.pathname+location.search);route()};   // one click, whatever the site did inside its frame
+const burger=document.getElementById('burger'),menu=document.getElementById('menu'),closeMenu=()=>{menu.classList.remove('open');burger.setAttribute('aria-expanded','false')};
+burger.onclick=e=>{e.stopPropagation();burger.setAttribute('aria-expanded',menu.classList.toggle('open'))};
+menu.addEventListener('click',e=>{if(e.target.closest('a'))closeMenu()});
+document.addEventListener('click',e=>{if(!menu.contains(e.target)&&!burger.contains(e.target))closeMenu()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
+ui();slope();route();addEventListener('resize',slope);addEventListener('load',slope);addEventListener('orientationchange',()=>setTimeout(slope,250));
+if(window.ResizeObserver)new ResizeObserver(slope).observe(document.querySelector('.disco'));if(window.visualViewport)visualViewport.addEventListener('resize',slope);
+// iOS/Android sometimes leave the clipped, animated banner unpainted on first load until something forces a re-layout (a zoom, a menu tap). Do that ourselves, a few times early on.
+// ticker scroll: driven by script, one small left-margin step per frame. A CSS transform animation inside the rotated, clipped banner is what stalls on iPhones until a zoom forces a recomposite.
+(()=>{const tr=document.getElementById('mq');let x=0,last=0,half=0,len=-1,fr=0;
+ const step=t=>{const dt=last?Math.min(100,t-last)/1000:0;last=t;
+  if(tr.textContent.length!==len||++fr>=180){fr=0;len=tr.textContent.length;half=tr.offsetWidth/2}   // re-measure when the text changes or the font finishes loading
+  if(half>0){x=(x+half/90*dt)%half;tr.style.marginLeft=(-x).toFixed(1)+'px'}   // full loop of the repeated text every 90s, as before
+  requestAnimationFrame(step)};
+ requestAnimationFrame(step)})();
+const toTop=document.getElementById('totop');   // jump back to top (main page): shows after scrolling down a screen or so
+toTop.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+addEventListener('scroll',()=>toTop.classList.toggle('show',scrollY>innerHeight*.8),{passive:true});
+const kick=()=>{slope()};
+requestAnimationFrame(()=>requestAnimationFrame(kick));[150,500,1200,2500,5000].forEach(ms=>setTimeout(kick,ms));
+addEventListener('load',kick);addEventListener('pageshow',kick);document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick()});
+document.fonts&&document.fonts.ready.then(()=>{slope();kick()});[300,1200,3000].forEach(ms=>setTimeout(slope,ms));
+addEventListener('storage',render);setInterval(render,9e5);
+showLoading();sheets();const bootDone=()=>{if(!BOOT)return;BOOT=false;render();kick()};
+Promise.allSettled([movies,music,software,booksAudio,stocks,deals,sports,trends,diet,scores].map(f=>{try{return Promise.resolve(f())}catch(e){return Promise.resolve()}})).then(()=>{bootDone();SETTLED=true;ORD={};render()});setTimeout(bootDone,8000);   // first draw when everything has arrived (or after 8s)
+</script></body></html>
